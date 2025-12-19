@@ -1,0 +1,94 @@
+severity = "warning"
+confidence = 0.8
+errorCode = 0
+warningCode = 0
+
+[rule.add-constant] 									# マジックナンバーや文字リテラルに使用できる定数を指定する。
+	# Arguments = [{maxLitCount = "3",allowStrs = "\"\"",allowInts="-1,0,1,2",allowFloats="",ignoreFuncs="os\\.*,fmt\\.Println,make,strconv\\.ParseFloat"}]
+	Disabled = true
+[rule.argument-limit] 								# int パラメータの最大数を指定する。
+	Arguments = [6]
+[rule.atomic]													# sync/atomicパッケージによくある間違いの使用法に対して警告する。
+[rule.bare-return] 										# 返り値に名前を付けると、`return`だけで自動的に返すことができる`naked return`に警告する。
+[rule.banned-characters] 							# []string 任意の文字を禁止できる。
+  Disabled = true
+[rule.blank-imports] 									# 空のimportを許可するか否か。
+	Disabled = true
+[rule.bool-literal-in-expr]						# 論理式内で`true`, `false`を使用しないことを推奨する。
+[rule.call-to-gc] 										# ガベージコレクターへの明示的な呼び出しを警告するルール。
+[rule.cognitive-complexity] 					# int 認知的複雑度(コードの理解しやすさの尺度)の最大値を定める。
+	Arguments = [15]
+[rule.comment-spacings] 							# []string 指定した文字列からコメントを開始する必要がある。
+	Arguments = ["TODO", "MEMO", "FIXME", "HACK", "XXX", "REVIEW", "OPTIMIZE", "IDEA"]
+[rule.confusing-naming]								# 大文字小文字の違いしか無い命名に警告する。例: `Member`と`member`など。
+[rule.confusing-results] 							# 同じ型の名前のない複数の値を返す関数/メソッドに警告する。
+[rule.constant-logical-expr]					# 常に同じ値に評価される論理式に警告する。例: `if flag = true`, `true || number > 0`など
+[rule.context-as-argument] 						# context.Contextが関数の最初の引数である必要がある。
+[rule.context-keys-type] 							# context.WithValueで基本の型を使用することを禁止する。
+[rule.cyclomatic] 										# int 循環的複雑度(コードの複雑さの尺度)の最大値を定める。テスト容易性の尺度にもなる。
+	Arguments = [10]
+[rule.datarace] 											# 潜在的なデータ競合を警告する。
+[rule.deep-exit]											# main()またはinit()以外でのプログラム終了コマンドを警告する。
+[rule.defer]													# deferステートメントを使用する際の一般的な間違いについて警告する。
+[rule.dot-imports] 										# `.`dot importを禁止する。
+[rule.duplicated-imports] 						# 2回以上インポートされたパッケージに警告する。
+[rule.early-return] 									# ネストを減らすため、アーリーリターンできる箇所を検出する。
+[rule.empty-block]										# 空のコードブロックに警告を出す。
+[rule.empty-lines]										# ブロックの先頭または末尾に改行がある場合に警告するルール。
+[rule.error-naming] 									# エラー変数のプリフィックスを`err`とする必要がある。
+[rule.error-return] 									# error返り値は返り値リストの最後にする必要がある。
+[rule.error-strings] 									# string 大文字のエラーメッセージや、句読点や改行で終わるエラーメッセージを許可しない。goの慣例。
+	Arguments = ["mypackage.Error"]
+[rule.errorf] 												# errors.New(fmt.Sprintf())をfmt.Errorf()に置き換えるよう警告する。
+[rule.exported] 											# エクスポートされた関数/メソッドにコメントを付けることを強制する。コメントをつけなくても変数名から処理内容は推測可能なので無効にする。
+  Disabled = true
+[rule.file-header]										# string 指定されたテキストでファイルを書き始めることを強制する。
+	Disabled = true
+[rule.flag-parameter]									# 制御結合を作成するbool値に警告する。
+[rule.function-length] 								# int, int 許容される最大ステートメント数と行数を指定する。
+  Disabled = true
+[rule.function-result-limit] 					# int 一つの関数の返り値の最大数を定める。
+  Arguments = [4]
+[rule.get-return]											# 名前の先頭に`Get`が付く関数が値を返さない場合、警告する。
+[rule.identical-branches] 						# if-then-elseブロックで同一の実装を持つ条件がある場合、警告する。
+[rule.if-return] 											#
+[rule.import-shadowing] 							# インポートされたパッケージ名と競合する識別子を検出する。
+[rule.imports-blacklist] 							# []string 指定されたパッケージのインポートを禁止する。
+	Disabled = true
+[rule.increment-decrement] 						# `i += 1`, `i -= 1`の代わりに`++`, `--`を使うことを推奨するルール。
+[rule.indent-error-flow] 							# 削除可能なelseブロックに対して警告を出す。
+[rule.line-length-limit] 							# int 設定された値よりも長いコード行に警告する。
+	Disabled = true
+[rule.max-public-structs]							# int 単一ファイル中で宣言できるパブリックな構造体の最大値を定める。
+	Disabled = true
+[rule.modifies-parameter]							# 関数が1つ以上のパラメータを変更する場合に警告する。
+[rule.modifies-value-receiver]				# 関数が1つ以上の引数を変更する場合に警告する。
+[rule.nested-structs] 								# 構造体内の構造体に警告するルール。
+[rule.optimize-operands-order] 				# 非効率な条件式を警告するルール。
+[rule.package-comments] 							# パッケージコメントをつけることを推奨するルール。外部公開するわけではないので不要と思われる。
+	Disabled = true
+[rule.range] 													# for-rangeにおいて、indexを使用していないにもかかわらず、宣言している場合に警告する。
+[rule.range-val-address]							# for-rangeにおいて、変数のアドレスをappend()に渡す時、mapで使用する時に警告する。
+[rule.range-val-in-closure]						# for-rangeにおいて、範囲値またはインデックスがクロージャ内で使用される場合に警告する。
+[rule.receiver-naming] 								# レシーバー変数のルール。
+[rule.redefines-builtin-id]						# 組み込みの定数や関数名を再定義する場合に警告する。
+[rule.string-format] 									# map
+[rule.string-of-int] 									# intからstringへの疑わしいキャストに対して警告するルール。
+[rule.struct-tag]											# 構造体タグはコンパイル時チェックされない。構造体タグにおいて、エラーがある場合に警告する。
+[rule.superfluous-else] 							# 削除可能なelseブロックに対して警告を出す。indent-error-flowの拡張。
+[rule.time-equal] 										# 時間の比較演算においてtime.Time.Equalを推奨する。
+[rule.time-naming] 										# `Secs`, `Mins`などの接尾辞に警告を出す。`time.Duration`との誤解の恐れがあるため。
+[rule.unconditional-recursion] 				# 無限再帰につながる関数呼び出しを警告するルール。
+[rule.unexported-naming] 							# 名前が大文字で始まっているがエクスポートされていないものに警告する。
+[rule.unexported-return] 							# エクスポートされた関数/メソッドがエクスポートされていない型の値を返す場合に警告を出す。
+[rule.unhandled-error] 								# 未処理のエラーに対して警告するルール。
+[rule.unnecessary-stmt]								# caseブロック内の冗長なステートメントを削除することを提案する。
+[rule.unreachable-code]								# 到達できないコードに警告をする。
+[rule.unused-parameter]								# 未使用の変数に警告をする。
+[rule.unused-receiver] 								# 使用されていないレシーバー変数の名前を変更するか削除することを推奨するルール。
+[rule.use-any] 												# `interface{}`を`any`に置き換えることを推奨するルール。Go1.18より`interface{}`の代わりに`any`を使うことが推奨されている。
+[rule.useless-break] 									# case節内の無駄な文を警告するルール。unnecessary-stmtの拡張。
+[rule.var-declaration] 								# 変数の命名がシンプルになることを推奨するルール。
+[rule.var-naming] 										# 慣例に沿っていないものを含む命名に警告を出す。例: × Json, Id ○ JSON, ID / golintのissueで多くのユーザーからネガティブな意見が出ていたルール。
+	arguments = [["JSON", "ID"]]			  # JSONAPIなど区切る箇所が分かりづらいコードに強制されるため、回避する。
+[rule.waitgroup-by-value]							# 関数またはメソッドで、`sync.WaitGroup`が値渡しパラメータとして期待される場合に警告する。
