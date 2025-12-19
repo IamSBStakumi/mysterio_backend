@@ -1,0 +1,124 @@
+openapi: 3.0.3
+info:
+  title: Murder Mystery API
+  version: 1.0.0
+
+paths:
+  /sessions:
+    post:
+      summary: Create a new game session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionRequest"
+      responses:
+        "200":
+          description: Game session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateSessionResponse"
+
+  /sessions/{sessionId}/players:
+    post:
+      summary: Join Session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JoinPlayerRequest"
+      responses:
+        "200":
+          description: Player joined successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JoinPlayerResponse"
+
+  /sessions/{sessionId}/phase:
+    get:
+      summary: Get current phase info
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: X-Player-Id
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current phase info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhaseResponse"
+
+  /sessions/{sessionId}/advance:
+    post:
+      summary: Advance to the next phase
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Game advanced successfully
+
+components:
+  schemas:
+    CreateSessionRequest:
+      type: object
+      required: [playerCount, difficulty]
+      properties:
+        playerCount:
+          type: integer
+          enum: [4, 5]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+
+    CreateSessionResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+
+    JoinPlayerRequest:
+      type: object
+      required: [playerName]
+      properties:
+        playerName:
+          type: string
+
+    JoinPlayerResponse:
+      type: object
+      properties:
+        playerId:
+          type: string
+        roleId:
+          type: string
+
+    PhaseResponse:
+      type: object
+      properties:
+        gmText:
+          type: string
+        publicInfo:
+          type: string
+        privateInfo:
+          type: string
