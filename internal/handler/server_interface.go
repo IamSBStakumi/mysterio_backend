@@ -2,10 +2,13 @@ package handler
 
 import (
 	"github.com/IamSBStakumi/mysterio_backend/internal/api"
+	"github.com/IamSBStakumi/mysterio_backend/internal/service"
 	"github.com/labstack/echo/v4"
 )
 
-type Server struct{}
+type Server struct{
+	SessionS *service.SessionService
+}
 
 type ServerInterface interface {
 	// Create a new game session

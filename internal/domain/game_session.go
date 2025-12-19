@@ -1,13 +1,10 @@
 package domain
 
-import (
-	"encoding/json"
-	"time"
-)
-
-type GameSession struct {
-	ID string
-	Phase string
-	Scenario json.RawMessage
-	CreatedAt time.Time
+type Session struct {
+	ID       string
+	Phase    Phase
+	Scenario []byte // JSON Schema validated scenario
+	Players  map[string]*Player
 }
+
+

@@ -13,9 +13,15 @@ func(s *Server) PostSessions(c echo.Context) error {
 		return err
 	}
 
-	sessionID := "uuid"
+	session, err := s.SessionS.CreateSession(
+		int(req.PlayerCount),
+		string(req.Difficulty),
+	)
+	if err != nil {
+		return err
+	}
 
 	return c.JSON(http.StatusOK, api.CreateSessionResponse{
-		SessionId: sessionID,
+		SessionId: session.ID,
 	})
 }

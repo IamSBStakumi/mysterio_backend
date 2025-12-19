@@ -6,6 +6,7 @@ import (
 
 	"github.com/IamSBStakumi/mysterio_backend/internal/api"
 	"github.com/IamSBStakumi/mysterio_backend/internal/handler"
+	"github.com/IamSBStakumi/mysterio_backend/internal/service"
 )
 
 func main(){
@@ -14,7 +15,12 @@ func main(){
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 
-	server := &handler.Server{}
+	scenarioS := service.NewScenarioService()
+	sessionS := service.NewSessionService(scenarioS)
+
+	server := &handler.Server{
+		SessionS: sessionS,
+	}
 	api.RegisterHandlers(e, server)
 
 	e.Logger.Fatal(e.Start(":8080"))
