@@ -1,12 +1,19 @@
 openapi: 3.0.3
 info:
-  title: Murder Mystery API
-  version: 1.0.0
+  title: Murder Mystery MVP API
+  version: 0.1.0
+  description: >
+    MVP backend API for AI-generated murder mystery game.
+    Face-to-face play, minimal endpoints.
+
+servers:
+  - url: http://localhost:8080
 
 paths:
   /sessions:
     post:
-      summary: Create a new game session
+      summary: Create new game session
+      operationId: postSessions
       requestBody:
         required: true
         content:
@@ -15,7 +22,7 @@ paths:
               $ref: "#/components/schemas/CreateSessionRequest"
       responses:
         "200":
-          description: Game session created successfully
+          description: Session created
           content:
             application/json:
               schema:
@@ -23,7 +30,8 @@ paths:
 
   /sessions/{sessionId}/players:
     post:
-      summary: Join Session
+      summary: Join a game session
+      operationId: postSessionPlayers
       parameters:
         - name: sessionId
           in: path
@@ -38,7 +46,7 @@ paths:
               $ref: "#/components/schemas/JoinPlayerRequest"
       responses:
         "200":
-          description: Player joined successfully
+          description: Player joined
           content:
             application/json:
               schema:
@@ -46,7 +54,8 @@ paths:
 
   /sessions/{sessionId}/phase:
     get:
-      summary: Get current phase info
+      summary: Get current phase information
+      operationId: getSessionPhase
       parameters:
         - name: sessionId
           in: path
@@ -60,7 +69,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Current phase info
+          description: Phase information
           content:
             application/json:
               schema:
@@ -68,7 +77,8 @@ paths:
 
   /sessions/{sessionId}/advance:
     post:
-      summary: Advance to the next phase
+      summary: Advance game phase (GM use)
+      operationId: postSessionAdvance
       parameters:
         - name: sessionId
           in: path
@@ -77,13 +87,19 @@ paths:
             type: string
       responses:
         "200":
-          description: Game advanced successfully
+          description: Phase advanced
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdvancePhaseResponse"
 
 components:
   schemas:
     CreateSessionRequest:
       type: object
-      required: [playerCount, difficulty]
+      required:
+        - playerCount
+        - difficulty
       properties:
         playerCount:
           type: integer
@@ -94,31 +110,70 @@ components:
 
     CreateSessionResponse:
       type: object
+      required:
+        - sessionId
       properties:
         sessionId:
           type: string
+          example: "session_123"
 
     JoinPlayerRequest:
       type: object
-      required: [playerName]
+      required:
+        - playerName
       properties:
         playerName:
           type: string
+          example: "Player A"
 
     JoinPlayerResponse:
       type: object
+      required:
+        - playerId
+        - roleId
       properties:
         playerId:
           type: string
+          example: "player_1"
         roleId:
           type: string
+          example: "p1"
 
     PhaseResponse:
       type: object
+      required:
+        - phase
+        - gmText
       properties:
+        phase:
+          type: string
+          enum:
+            - intro
+            - investigation1
+            - investigation2
+            - discussion
+            - voting
+            - ending
         gmText:
           type: string
         publicInfo:
           type: string
+          nullable: true
         privateInfo:
           type: string
+          nullable: true
+
+    AdvancePhaseResponse:
+      type: object
+      required:
+        - phase
+      properties:
+        phase:
+          type: string
+          enum:
+            - intro
+            - investigation1
+            - investigation2
+            - discussion
+            - voting
+            - ending

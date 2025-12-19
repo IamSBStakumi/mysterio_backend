@@ -21,6 +21,16 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
+// Defines values for AdvancePhaseResponsePhase.
+const (
+	AdvancePhaseResponsePhaseDiscussion     AdvancePhaseResponsePhase = "discussion"
+	AdvancePhaseResponsePhaseEnding         AdvancePhaseResponsePhase = "ending"
+	AdvancePhaseResponsePhaseIntro          AdvancePhaseResponsePhase = "intro"
+	AdvancePhaseResponsePhaseInvestigation1 AdvancePhaseResponsePhase = "investigation1"
+	AdvancePhaseResponsePhaseInvestigation2 AdvancePhaseResponsePhase = "investigation2"
+	AdvancePhaseResponsePhaseVoting         AdvancePhaseResponsePhase = "voting"
+)
+
 // Defines values for CreateSessionRequestDifficulty.
 const (
 	Easy   CreateSessionRequestDifficulty = "easy"
@@ -33,6 +43,24 @@ const (
 	N4 CreateSessionRequestPlayerCount = 4
 	N5 CreateSessionRequestPlayerCount = 5
 )
+
+// Defines values for PhaseResponsePhase.
+const (
+	PhaseResponsePhaseDiscussion     PhaseResponsePhase = "discussion"
+	PhaseResponsePhaseEnding         PhaseResponsePhase = "ending"
+	PhaseResponsePhaseIntro          PhaseResponsePhase = "intro"
+	PhaseResponsePhaseInvestigation1 PhaseResponsePhase = "investigation1"
+	PhaseResponsePhaseInvestigation2 PhaseResponsePhase = "investigation2"
+	PhaseResponsePhaseVoting         PhaseResponsePhase = "voting"
+)
+
+// AdvancePhaseResponse defines model for AdvancePhaseResponse.
+type AdvancePhaseResponse struct {
+	Phase AdvancePhaseResponsePhase `json:"phase"`
+}
+
+// AdvancePhaseResponsePhase defines model for AdvancePhaseResponse.Phase.
+type AdvancePhaseResponsePhase string
 
 // CreateSessionRequest defines model for CreateSessionRequest.
 type CreateSessionRequest struct {
@@ -48,7 +76,7 @@ type CreateSessionRequestPlayerCount int
 
 // CreateSessionResponse defines model for CreateSessionResponse.
 type CreateSessionResponse struct {
-	SessionId *string `json:"sessionId,omitempty"`
+	SessionId string `json:"sessionId"`
 }
 
 // JoinPlayerRequest defines model for JoinPlayerRequest.
@@ -58,27 +86,31 @@ type JoinPlayerRequest struct {
 
 // JoinPlayerResponse defines model for JoinPlayerResponse.
 type JoinPlayerResponse struct {
-	PlayerId *string `json:"playerId,omitempty"`
-	RoleId   *string `json:"roleId,omitempty"`
+	PlayerId string `json:"playerId"`
+	RoleId   string `json:"roleId"`
 }
 
 // PhaseResponse defines model for PhaseResponse.
 type PhaseResponse struct {
-	GmText      *string `json:"gmText,omitempty"`
-	PrivateInfo *string `json:"privateInfo,omitempty"`
-	PublicInfo  *string `json:"publicInfo,omitempty"`
+	GmText      string             `json:"gmText"`
+	Phase       PhaseResponsePhase `json:"phase"`
+	PrivateInfo *string            `json:"privateInfo"`
+	PublicInfo  *string            `json:"publicInfo"`
 }
 
-// GetSessionsSessionIdPhaseParams defines parameters for GetSessionsSessionIdPhase.
-type GetSessionsSessionIdPhaseParams struct {
+// PhaseResponsePhase defines model for PhaseResponse.Phase.
+type PhaseResponsePhase string
+
+// GetSessionPhaseParams defines parameters for GetSessionPhase.
+type GetSessionPhaseParams struct {
 	XPlayerId string `json:"X-Player-Id"`
 }
 
 // PostSessionsJSONRequestBody defines body for PostSessions for application/json ContentType.
 type PostSessionsJSONRequestBody = CreateSessionRequest
 
-// PostSessionsSessionIdPlayersJSONRequestBody defines body for PostSessionsSessionIdPlayers for application/json ContentType.
-type PostSessionsSessionIdPlayersJSONRequestBody = JoinPlayerRequest
+// PostSessionPlayersJSONRequestBody defines body for PostSessionPlayers for application/json ContentType.
+type PostSessionPlayersJSONRequestBody = JoinPlayerRequest
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -158,16 +190,16 @@ type ClientInterface interface {
 
 	PostSessions(ctx context.Context, body PostSessionsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostSessionsSessionIdAdvance request
-	PostSessionsSessionIdAdvance(ctx context.Context, sessionId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostSessionAdvance request
+	PostSessionAdvance(ctx context.Context, sessionId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetSessionsSessionIdPhase request
-	GetSessionsSessionIdPhase(ctx context.Context, sessionId string, params *GetSessionsSessionIdPhaseParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetSessionPhase request
+	GetSessionPhase(ctx context.Context, sessionId string, params *GetSessionPhaseParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostSessionsSessionIdPlayersWithBody request with any body
-	PostSessionsSessionIdPlayersWithBody(ctx context.Context, sessionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostSessionPlayersWithBody request with any body
+	PostSessionPlayersWithBody(ctx context.Context, sessionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostSessionsSessionIdPlayers(ctx context.Context, sessionId string, body PostSessionsSessionIdPlayersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostSessionPlayers(ctx context.Context, sessionId string, body PostSessionPlayersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) PostSessionsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -194,8 +226,8 @@ func (c *Client) PostSessions(ctx context.Context, body PostSessionsJSONRequestB
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostSessionsSessionIdAdvance(ctx context.Context, sessionId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostSessionsSessionIdAdvanceRequest(c.Server, sessionId)
+func (c *Client) PostSessionAdvance(ctx context.Context, sessionId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostSessionAdvanceRequest(c.Server, sessionId)
 	if err != nil {
 		return nil, err
 	}
@@ -206,8 +238,8 @@ func (c *Client) PostSessionsSessionIdAdvance(ctx context.Context, sessionId str
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetSessionsSessionIdPhase(ctx context.Context, sessionId string, params *GetSessionsSessionIdPhaseParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetSessionsSessionIdPhaseRequest(c.Server, sessionId, params)
+func (c *Client) GetSessionPhase(ctx context.Context, sessionId string, params *GetSessionPhaseParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSessionPhaseRequest(c.Server, sessionId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -218,8 +250,8 @@ func (c *Client) GetSessionsSessionIdPhase(ctx context.Context, sessionId string
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostSessionsSessionIdPlayersWithBody(ctx context.Context, sessionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostSessionsSessionIdPlayersRequestWithBody(c.Server, sessionId, contentType, body)
+func (c *Client) PostSessionPlayersWithBody(ctx context.Context, sessionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostSessionPlayersRequestWithBody(c.Server, sessionId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -230,8 +262,8 @@ func (c *Client) PostSessionsSessionIdPlayersWithBody(ctx context.Context, sessi
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostSessionsSessionIdPlayers(ctx context.Context, sessionId string, body PostSessionsSessionIdPlayersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostSessionsSessionIdPlayersRequest(c.Server, sessionId, body)
+func (c *Client) PostSessionPlayers(ctx context.Context, sessionId string, body PostSessionPlayersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostSessionPlayersRequest(c.Server, sessionId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -282,8 +314,8 @@ func NewPostSessionsRequestWithBody(server string, contentType string, body io.R
 	return req, nil
 }
 
-// NewPostSessionsSessionIdAdvanceRequest generates requests for PostSessionsSessionIdAdvance
-func NewPostSessionsSessionIdAdvanceRequest(server string, sessionId string) (*http.Request, error) {
+// NewPostSessionAdvanceRequest generates requests for PostSessionAdvance
+func NewPostSessionAdvanceRequest(server string, sessionId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -316,8 +348,8 @@ func NewPostSessionsSessionIdAdvanceRequest(server string, sessionId string) (*h
 	return req, nil
 }
 
-// NewGetSessionsSessionIdPhaseRequest generates requests for GetSessionsSessionIdPhase
-func NewGetSessionsSessionIdPhaseRequest(server string, sessionId string, params *GetSessionsSessionIdPhaseParams) (*http.Request, error) {
+// NewGetSessionPhaseRequest generates requests for GetSessionPhase
+func NewGetSessionPhaseRequest(server string, sessionId string, params *GetSessionPhaseParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -363,19 +395,19 @@ func NewGetSessionsSessionIdPhaseRequest(server string, sessionId string, params
 	return req, nil
 }
 
-// NewPostSessionsSessionIdPlayersRequest calls the generic PostSessionsSessionIdPlayers builder with application/json body
-func NewPostSessionsSessionIdPlayersRequest(server string, sessionId string, body PostSessionsSessionIdPlayersJSONRequestBody) (*http.Request, error) {
+// NewPostSessionPlayersRequest calls the generic PostSessionPlayers builder with application/json body
+func NewPostSessionPlayersRequest(server string, sessionId string, body PostSessionPlayersJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostSessionsSessionIdPlayersRequestWithBody(server, sessionId, "application/json", bodyReader)
+	return NewPostSessionPlayersRequestWithBody(server, sessionId, "application/json", bodyReader)
 }
 
-// NewPostSessionsSessionIdPlayersRequestWithBody generates requests for PostSessionsSessionIdPlayers with any type of body
-func NewPostSessionsSessionIdPlayersRequestWithBody(server string, sessionId string, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostSessionPlayersRequestWithBody generates requests for PostSessionPlayers with any type of body
+func NewPostSessionPlayersRequestWithBody(server string, sessionId string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -458,16 +490,16 @@ type ClientWithResponsesInterface interface {
 
 	PostSessionsWithResponse(ctx context.Context, body PostSessionsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSessionsResponse, error)
 
-	// PostSessionsSessionIdAdvanceWithResponse request
-	PostSessionsSessionIdAdvanceWithResponse(ctx context.Context, sessionId string, reqEditors ...RequestEditorFn) (*PostSessionsSessionIdAdvanceResponse, error)
+	// PostSessionAdvanceWithResponse request
+	PostSessionAdvanceWithResponse(ctx context.Context, sessionId string, reqEditors ...RequestEditorFn) (*PostSessionAdvanceResponse, error)
 
-	// GetSessionsSessionIdPhaseWithResponse request
-	GetSessionsSessionIdPhaseWithResponse(ctx context.Context, sessionId string, params *GetSessionsSessionIdPhaseParams, reqEditors ...RequestEditorFn) (*GetSessionsSessionIdPhaseResponse, error)
+	// GetSessionPhaseWithResponse request
+	GetSessionPhaseWithResponse(ctx context.Context, sessionId string, params *GetSessionPhaseParams, reqEditors ...RequestEditorFn) (*GetSessionPhaseResponse, error)
 
-	// PostSessionsSessionIdPlayersWithBodyWithResponse request with any body
-	PostSessionsSessionIdPlayersWithBodyWithResponse(ctx context.Context, sessionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSessionsSessionIdPlayersResponse, error)
+	// PostSessionPlayersWithBodyWithResponse request with any body
+	PostSessionPlayersWithBodyWithResponse(ctx context.Context, sessionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSessionPlayersResponse, error)
 
-	PostSessionsSessionIdPlayersWithResponse(ctx context.Context, sessionId string, body PostSessionsSessionIdPlayersJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSessionsSessionIdPlayersResponse, error)
+	PostSessionPlayersWithResponse(ctx context.Context, sessionId string, body PostSessionPlayersJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSessionPlayersResponse, error)
 }
 
 type PostSessionsResponse struct {
@@ -492,13 +524,14 @@ func (r PostSessionsResponse) StatusCode() int {
 	return 0
 }
 
-type PostSessionsSessionIdAdvanceResponse struct {
+type PostSessionAdvanceResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON200      *AdvancePhaseResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r PostSessionsSessionIdAdvanceResponse) Status() string {
+func (r PostSessionAdvanceResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -506,21 +539,21 @@ func (r PostSessionsSessionIdAdvanceResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostSessionsSessionIdAdvanceResponse) StatusCode() int {
+func (r PostSessionAdvanceResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetSessionsSessionIdPhaseResponse struct {
+type GetSessionPhaseResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *PhaseResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r GetSessionsSessionIdPhaseResponse) Status() string {
+func (r GetSessionPhaseResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -528,21 +561,21 @@ func (r GetSessionsSessionIdPhaseResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetSessionsSessionIdPhaseResponse) StatusCode() int {
+func (r GetSessionPhaseResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type PostSessionsSessionIdPlayersResponse struct {
+type PostSessionPlayersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *JoinPlayerResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r PostSessionsSessionIdPlayersResponse) Status() string {
+func (r PostSessionPlayersResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -550,7 +583,7 @@ func (r PostSessionsSessionIdPlayersResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostSessionsSessionIdPlayersResponse) StatusCode() int {
+func (r PostSessionPlayersResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -574,39 +607,39 @@ func (c *ClientWithResponses) PostSessionsWithResponse(ctx context.Context, body
 	return ParsePostSessionsResponse(rsp)
 }
 
-// PostSessionsSessionIdAdvanceWithResponse request returning *PostSessionsSessionIdAdvanceResponse
-func (c *ClientWithResponses) PostSessionsSessionIdAdvanceWithResponse(ctx context.Context, sessionId string, reqEditors ...RequestEditorFn) (*PostSessionsSessionIdAdvanceResponse, error) {
-	rsp, err := c.PostSessionsSessionIdAdvance(ctx, sessionId, reqEditors...)
+// PostSessionAdvanceWithResponse request returning *PostSessionAdvanceResponse
+func (c *ClientWithResponses) PostSessionAdvanceWithResponse(ctx context.Context, sessionId string, reqEditors ...RequestEditorFn) (*PostSessionAdvanceResponse, error) {
+	rsp, err := c.PostSessionAdvance(ctx, sessionId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostSessionsSessionIdAdvanceResponse(rsp)
+	return ParsePostSessionAdvanceResponse(rsp)
 }
 
-// GetSessionsSessionIdPhaseWithResponse request returning *GetSessionsSessionIdPhaseResponse
-func (c *ClientWithResponses) GetSessionsSessionIdPhaseWithResponse(ctx context.Context, sessionId string, params *GetSessionsSessionIdPhaseParams, reqEditors ...RequestEditorFn) (*GetSessionsSessionIdPhaseResponse, error) {
-	rsp, err := c.GetSessionsSessionIdPhase(ctx, sessionId, params, reqEditors...)
+// GetSessionPhaseWithResponse request returning *GetSessionPhaseResponse
+func (c *ClientWithResponses) GetSessionPhaseWithResponse(ctx context.Context, sessionId string, params *GetSessionPhaseParams, reqEditors ...RequestEditorFn) (*GetSessionPhaseResponse, error) {
+	rsp, err := c.GetSessionPhase(ctx, sessionId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetSessionsSessionIdPhaseResponse(rsp)
+	return ParseGetSessionPhaseResponse(rsp)
 }
 
-// PostSessionsSessionIdPlayersWithBodyWithResponse request with arbitrary body returning *PostSessionsSessionIdPlayersResponse
-func (c *ClientWithResponses) PostSessionsSessionIdPlayersWithBodyWithResponse(ctx context.Context, sessionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSessionsSessionIdPlayersResponse, error) {
-	rsp, err := c.PostSessionsSessionIdPlayersWithBody(ctx, sessionId, contentType, body, reqEditors...)
+// PostSessionPlayersWithBodyWithResponse request with arbitrary body returning *PostSessionPlayersResponse
+func (c *ClientWithResponses) PostSessionPlayersWithBodyWithResponse(ctx context.Context, sessionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSessionPlayersResponse, error) {
+	rsp, err := c.PostSessionPlayersWithBody(ctx, sessionId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostSessionsSessionIdPlayersResponse(rsp)
+	return ParsePostSessionPlayersResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostSessionsSessionIdPlayersWithResponse(ctx context.Context, sessionId string, body PostSessionsSessionIdPlayersJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSessionsSessionIdPlayersResponse, error) {
-	rsp, err := c.PostSessionsSessionIdPlayers(ctx, sessionId, body, reqEditors...)
+func (c *ClientWithResponses) PostSessionPlayersWithResponse(ctx context.Context, sessionId string, body PostSessionPlayersJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSessionPlayersResponse, error) {
+	rsp, err := c.PostSessionPlayers(ctx, sessionId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostSessionsSessionIdPlayersResponse(rsp)
+	return ParsePostSessionPlayersResponse(rsp)
 }
 
 // ParsePostSessionsResponse parses an HTTP response from a PostSessionsWithResponse call
@@ -635,31 +668,41 @@ func ParsePostSessionsResponse(rsp *http.Response) (*PostSessionsResponse, error
 	return response, nil
 }
 
-// ParsePostSessionsSessionIdAdvanceResponse parses an HTTP response from a PostSessionsSessionIdAdvanceWithResponse call
-func ParsePostSessionsSessionIdAdvanceResponse(rsp *http.Response) (*PostSessionsSessionIdAdvanceResponse, error) {
+// ParsePostSessionAdvanceResponse parses an HTTP response from a PostSessionAdvanceWithResponse call
+func ParsePostSessionAdvanceResponse(rsp *http.Response) (*PostSessionAdvanceResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostSessionsSessionIdAdvanceResponse{
+	response := &PostSessionAdvanceResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AdvancePhaseResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil
 }
 
-// ParseGetSessionsSessionIdPhaseResponse parses an HTTP response from a GetSessionsSessionIdPhaseWithResponse call
-func ParseGetSessionsSessionIdPhaseResponse(rsp *http.Response) (*GetSessionsSessionIdPhaseResponse, error) {
+// ParseGetSessionPhaseResponse parses an HTTP response from a GetSessionPhaseWithResponse call
+func ParseGetSessionPhaseResponse(rsp *http.Response) (*GetSessionPhaseResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetSessionsSessionIdPhaseResponse{
+	response := &GetSessionPhaseResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -677,15 +720,15 @@ func ParseGetSessionsSessionIdPhaseResponse(rsp *http.Response) (*GetSessionsSes
 	return response, nil
 }
 
-// ParsePostSessionsSessionIdPlayersResponse parses an HTTP response from a PostSessionsSessionIdPlayersWithResponse call
-func ParsePostSessionsSessionIdPlayersResponse(rsp *http.Response) (*PostSessionsSessionIdPlayersResponse, error) {
+// ParsePostSessionPlayersResponse parses an HTTP response from a PostSessionPlayersWithResponse call
+func ParsePostSessionPlayersResponse(rsp *http.Response) (*PostSessionPlayersResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostSessionsSessionIdPlayersResponse{
+	response := &PostSessionPlayersResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -705,18 +748,18 @@ func ParsePostSessionsSessionIdPlayersResponse(rsp *http.Response) (*PostSession
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Create a new game session
+	// Create new game session
 	// (POST /sessions)
 	PostSessions(ctx echo.Context) error
-	// Advance to the next phase
+	// Advance game phase (GM use)
 	// (POST /sessions/{sessionId}/advance)
-	PostSessionsSessionIdAdvance(ctx echo.Context, sessionId string) error
-	// Get current phase info
+	PostSessionAdvance(ctx echo.Context, sessionId string) error
+	// Get current phase information
 	// (GET /sessions/{sessionId}/phase)
-	GetSessionsSessionIdPhase(ctx echo.Context, sessionId string, params GetSessionsSessionIdPhaseParams) error
-	// Join Session
+	GetSessionPhase(ctx echo.Context, sessionId string, params GetSessionPhaseParams) error
+	// Join a game session
 	// (POST /sessions/{sessionId}/players)
-	PostSessionsSessionIdPlayers(ctx echo.Context, sessionId string) error
+	PostSessionPlayers(ctx echo.Context, sessionId string) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -733,8 +776,8 @@ func (w *ServerInterfaceWrapper) PostSessions(ctx echo.Context) error {
 	return err
 }
 
-// PostSessionsSessionIdAdvance converts echo context to params.
-func (w *ServerInterfaceWrapper) PostSessionsSessionIdAdvance(ctx echo.Context) error {
+// PostSessionAdvance converts echo context to params.
+func (w *ServerInterfaceWrapper) PostSessionAdvance(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
 	var sessionId string
@@ -745,12 +788,12 @@ func (w *ServerInterfaceWrapper) PostSessionsSessionIdAdvance(ctx echo.Context) 
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostSessionsSessionIdAdvance(ctx, sessionId)
+	err = w.Handler.PostSessionAdvance(ctx, sessionId)
 	return err
 }
 
-// GetSessionsSessionIdPhase converts echo context to params.
-func (w *ServerInterfaceWrapper) GetSessionsSessionIdPhase(ctx echo.Context) error {
+// GetSessionPhase converts echo context to params.
+func (w *ServerInterfaceWrapper) GetSessionPhase(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
 	var sessionId string
@@ -761,7 +804,7 @@ func (w *ServerInterfaceWrapper) GetSessionsSessionIdPhase(ctx echo.Context) err
 	}
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetSessionsSessionIdPhaseParams
+	var params GetSessionPhaseParams
 
 	headers := ctx.Request().Header
 	// ------------- Required header parameter "X-Player-Id" -------------
@@ -783,12 +826,12 @@ func (w *ServerInterfaceWrapper) GetSessionsSessionIdPhase(ctx echo.Context) err
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.GetSessionsSessionIdPhase(ctx, sessionId, params)
+	err = w.Handler.GetSessionPhase(ctx, sessionId, params)
 	return err
 }
 
-// PostSessionsSessionIdPlayers converts echo context to params.
-func (w *ServerInterfaceWrapper) PostSessionsSessionIdPlayers(ctx echo.Context) error {
+// PostSessionPlayers converts echo context to params.
+func (w *ServerInterfaceWrapper) PostSessionPlayers(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
 	var sessionId string
@@ -799,7 +842,7 @@ func (w *ServerInterfaceWrapper) PostSessionsSessionIdPlayers(ctx echo.Context) 
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.PostSessionsSessionIdPlayers(ctx, sessionId)
+	err = w.Handler.PostSessionPlayers(ctx, sessionId)
 	return err
 }
 
@@ -832,26 +875,29 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.POST(baseURL+"/sessions", wrapper.PostSessions)
-	router.POST(baseURL+"/sessions/:sessionId/advance", wrapper.PostSessionsSessionIdAdvance)
-	router.GET(baseURL+"/sessions/:sessionId/phase", wrapper.GetSessionsSessionIdPhase)
-	router.POST(baseURL+"/sessions/:sessionId/players", wrapper.PostSessionsSessionIdPlayers)
+	router.POST(baseURL+"/sessions/:sessionId/advance", wrapper.PostSessionAdvance)
+	router.GET(baseURL+"/sessions/:sessionId/phase", wrapper.GetSessionPhase)
+	router.POST(baseURL+"/sessions/:sessionId/players", wrapper.PostSessionPlayers)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
