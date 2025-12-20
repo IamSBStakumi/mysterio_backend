@@ -1,12 +1,12 @@
 package service
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 
+	"github.com/IamSBStakumi/mysterio_backend/internal/domain"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
@@ -15,7 +15,8 @@ type ScenarioService struct {
 }
 
 const (
-	SCHEMA_PATH = "internal/schema/scenario.schema.json"
+	// SCHEMA_PATH = "internal/schema/scenario.schema.json"
+	SCHEMA_PATH = "internal/schema/scenario.mvp.json"
 )
 
 func NewScenarioService() (*ScenarioService, error) {
@@ -47,7 +48,7 @@ func (s *ScenarioService) Generate(
 	ctx context.Context,
 	playerCount int,
 	difficulty string,
-) ([]byte, error) {
+) (*domain.Scenario, error) {
 
 	// 仮の生成結果。後でAIに差し替える
 	scenarioJSON := []byte(`{
@@ -56,14 +57,49 @@ func (s *ScenarioService) Generate(
 			"durationMinutes": 90,
 			"playerCount": 5
 		},
-		"roles": [],
-		"phases": []
+		"roles": [
+			{
+				"id": "p1",
+				"name": "Detective",
+				"description": "You are a detective."
+			},
+			{
+				"id": "p2",
+				"name": "Witness",
+				"description": "You saw something important."
+			},
+			{
+				"id": "p3",
+				"name": "Suspect",
+				"description": "You are hiding something."
+			}
+		],
+		"phases": [
+			{
+				"phase": "intro",
+				"public": {
+					"description": "The Story begins."
+				}
+			}
+		]
 	}`)
 
-	// JSON Schema Validation
-	if err := s.Schema.Validate(bytes.NewReader(scenarioJSON)); err != nil {
+	// 1. JSON Unmarshal
+	var raw any
+	if err := json.Unmarshal(scenarioJSON, &raw); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal scenario: %w", err)
+	}
+
+	// 2. Schema Validation
+	if err := s.Schema.Validate(raw); err != nil {
 		return nil, fmt.Errorf("failed to validate scenario: %w", err)
 	}
 
-	return scenarioJSON, nil
+	// 3. struct にパース
+	var scenario domain.Scenario
+	if err := json.Unmarshal(scenarioJSON, &scenario); err != nil {
+		return nil, fmt.Errorf("failed to parse scenario: %w", err)
+	}
+
+	return &scenario, nil
 }

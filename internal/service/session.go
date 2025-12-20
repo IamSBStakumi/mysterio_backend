@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"log"
 	"sync"
 
 	"fmt"
@@ -42,6 +43,11 @@ func (s *SessionService) CreateSession(
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.sessions[session.ID] = session
+
+	log.Printf("scenario title=%s phaseCount=%d",
+	session.Scenario.Meta.Title,
+	len(session.Scenario.Phases),
+)
 
 	return session, nil
 }
