@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MurderMysteryScenario",
+  "type": "object",
+  "required": ["meta", "setting", "characters", "phases", "truth"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["playerCount", "estimatedTimeMinutes", "difficulty"],
+      "properties": {
+        "playerCount": {
+          "type": "integer",
+          "minimum": 4,
+          "maximum": 5
+        },
+        "estimatedTimeMinutes": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 120
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard"]
+        }
+      }
+    },
+
+    "setting": {
+      "type": "object",
+      "required": ["title", "worldDescription", "incidentDescription"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 3
+        },
+        "worldDescription": {
+          "type": "string",
+          "minLength": 50
+        },
+        "incidentDescription": {
+          "type": "string",
+          "minLength": 50
+        }
+      }
+    },
+
+    "characters": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "publicProfile", "secret", "personalGoal"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^p[1-5]$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "publicProfile": {
+            "type": "string",
+            "minLength": 50
+          },
+          "secret": {
+            "type": "string",
+            "minLength": 50
+          },
+          "personalGoal": {
+            "type": "string",
+            "minLength": 20
+          }
+        }
+      }
+    },
+
+    "phases": {
+      "type": "object",
+      "required": [
+        "intro",
+        "investigation1",
+        "investigation2",
+        "discussion",
+        "voting",
+        "ending"
+      ],
+      "properties": {
+        "intro": {
+          "type": "object",
+          "required": ["gmText"],
+          "properties": {
+            "gmText": {
+              "type": "string",
+              "minLength": 50
+            }
+          }
+        },
+
+        "investigation1": {
+          "$ref": "#/$defs/investigationPhase"
+        },
+
+        "investigation2": {
+          "$ref": "#/$defs/investigationPhase"
+        },
+
+        "discussion": {
+          "type": "object",
+          "required": ["gmText"],
+          "properties": {
+            "gmText": {
+              "type": "string",
+              "minLength": 30
+            }
+          }
+        },
+
+        "voting": {
+          "type": "object",
+          "required": ["gmText"],
+          "properties": {
+            "gmText": {
+              "type": "string",
+              "minLength": 20
+            }
+          }
+        },
+
+        "ending": {
+          "type": "object",
+          "required": ["gmText"],
+          "properties": {
+            "gmText": {
+              "type": "string",
+              "minLength": 50
+            }
+          }
+        }
+      }
+    },
+
+    "truth": {
+      "type": "object",
+      "required": ["culpritId", "motive", "method", "timeline", "redHerrings"],
+      "properties": {
+        "culpritId": {
+          "type": "string",
+          "pattern": "^p[1-5]$"
+        },
+        "motive": {
+          "type": "string",
+          "minLength": 50
+        },
+        "method": {
+          "type": "string",
+          "minLength": 50
+        },
+        "timeline": {
+          "type": "string",
+          "minLength": 80
+        },
+        "redHerrings": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "string",
+            "minLength": 30
+          }
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "investigationPhase": {
+      "type": "object",
+      "required": ["gmText", "publicInfo", "privateInfo"],
+      "properties": {
+        "gmText": {
+          "type": "string",
+          "minLength": 30
+        },
+        "publicInfo": {
+          "type": "string",
+          "minLength": 30
+        },
+        "privateInfo": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 30
+          }
+        }
+      }
+    }
+  }
+}

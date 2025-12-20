@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -15,7 +17,11 @@ func main(){
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 
-	scenarioS := service.NewScenarioService()
+	scenarioS, err := service.NewScenarioService()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	sessionS := service.NewSessionService(scenarioS)
 
 	server := &handler.Server{

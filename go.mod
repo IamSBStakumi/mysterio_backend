@@ -10,6 +10,7 @@ require (
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/labstack/echo/v4 v4.14.0
 	github.com/oapi-codegen/runtime v1.1.2
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 )
 
 require (
