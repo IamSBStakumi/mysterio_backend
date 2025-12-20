@@ -1,7 +1,6 @@
 package domain
 
 type Player struct {
-	ID string
-	SessionID string
-	RoleID string
+	ID     string
+	RoleID string // p1–p5
 }

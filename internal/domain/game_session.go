@@ -1,8 +1,10 @@
 package domain
 
-type GameSession struct {
-	ID string
-	Phase string
-	Scenario json.RawMessage
-	CreatedAt time.Time
+type Session struct {
+	ID       string
+	Phase    Phase
+	Scenario *Scenario
+	Players  map[string]*Player
 }
+
+

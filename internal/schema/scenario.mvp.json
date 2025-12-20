@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["meta", "roles", "phases"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["title", "playerCount", "durationMinutes"],
+      "properties": {
+        "title": { "type": "string" },
+        "playerCount": { "type": "integer", "minimum": 3 },
+        "durationMinutes": { "type": "integer", "maximum": 120 }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "description"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["phase", "public"],
+        "properties": {
+          "phase": { "type": "string" },
+          "public": {
+            "type": "object",
+            "required": ["description"],
+            "properties": {
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
