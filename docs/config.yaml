@@ -6,3 +6,9 @@ generate:
 output: ./internal/api/api.gen.go
 output-options:
   skip-prune: true
+import-mapping:
+  # UUID型をgoogle/uuidにマッピング
+  uuid: github.com/google/uuid
+compatibility:
+  # 古い動作との互換性を維持
+  always-prefix-enum-values: false

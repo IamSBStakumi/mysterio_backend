@@ -217,7 +217,6 @@ components:
       description: セッションID
       schema:
         type: string
-        format: uuid
       example: "550e8400-e29b-41d4-a716-446655440000"
 
     PlayerIdHeader:
@@ -227,7 +226,6 @@ components:
       description: プレイヤーID
       schema:
         type: string
-        format: uuid
       example: "660e8400-e29b-41d4-a716-446655440001"
 
   schemas:
@@ -262,19 +260,16 @@ components:
       properties:
         sessionId:
           type: string
-          format: uuid
           description: セッションID
           example: "550e8400-e29b-41d4-a716-446655440000"
         ownerPlayerId:
           type: string
-          format: uuid
           description: セッションオーナーのプレイヤーID
           example: "660e8400-e29b-41d4-a716-446655440001"
         playerIds:
           type: array
           items:
             type: string
-            format: uuid
           description: 全プレイヤーのID
           example:
             - "660e8400-e29b-41d4-a716-446655440001"
@@ -370,7 +365,6 @@ components:
       properties:
         targetPlayerId:
           type: string
-          format: uuid
           description: 投票対象のプレイヤーID
           example: "660e8400-e29b-41d4-a716-446655440002"
 
@@ -389,7 +383,6 @@ components:
           example: "犯人はアレックス・クロフォードである。動機は..."
         winnerId:
           type: string
-          format: uuid
           description: 最も票を集めたプレイヤーのID
           example: "660e8400-e29b-41d4-a716-446655440001"
         winnerName:
