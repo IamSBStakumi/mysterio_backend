@@ -3,6 +3,11 @@ init:
 	go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
 	oapi-codegen --config=docs/config.yaml docs/openapi.yaml
 
+# oapi-codegenを使えるようにPATHを通す
+path:
+	echo 'export PATH=$PATH:/home/sbs_takumi/go/bin' >> ~/.zshrc
+	source ~/.zshrc
+
 # ツールのインストール
 install-tools:
 	@echo "Installing oapi-codegen..."
@@ -11,7 +16,7 @@ install-tools:
 # OpenAPIからコード生成
 generate:
 	@echo "Generating code from OpenAPI spec..."
-	oapi-codegen -config docs/config.yaml docs/openapi.yaml
+	oapi-codegen --config=docs/config.yaml docs/openapi.yaml
 	@echo "Code generation complete!"
 
 # サーバーを起動
