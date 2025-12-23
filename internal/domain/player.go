@@ -1,6 +1,10 @@
 package domain
 
-type Player struct {
-	ID     string
-	RoleID string // p1–p5
+// Character はプレイヤーキャラクターを表す
+type Character struct {
+	PlayerID   string
+	Name       string
+	Role       string
+	SecretInfo string
+	PublicInfo string
 }
