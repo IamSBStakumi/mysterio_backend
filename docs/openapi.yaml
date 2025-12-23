@@ -1,19 +1,32 @@
 openapi: 3.0.3
 info:
-  title: Murder Mystery MVP API
-  version: 0.1.0
-  description: >
-    MVP backend API for AI-generated murder mystery game.
-    Face-to-face play, minimal endpoints.
-
+  title: Mysterio API
+  description: AIが生成するマーダーミステリーゲームのバックエンドAPI
+  version: 0.0.1
+  contact:
+    name: SBS
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8080/api/v1
+    description: ローカル開発環境
+
+tags:
+  - name: sessions
+    description: セッション管理
+  - name: phases
+    description: フェーズ管理
+  - name: votes
+    description: 投票管理
+  - name: results
+    description: 結果取得
 
 paths:
   /sessions:
     post:
-      summary: Create new game session
-      operationId: postSessions
+      tags:
+        - sessions
+      summary: セッション作成
+      description: 新しいマーダーミステリーのセッションを作成し、AIがシナリオを生成する
+      operationId: createSession
       requestBody:
         required: true
         content:
@@ -21,79 +34,202 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateSessionRequest"
       responses:
-        "200":
-          description: Session created
+        "201":
+          description: セッションが正常に作成された
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreateSessionResponse"
+        "400":
+          description: リクエストが不正
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
-  /sessions/{sessionId}/players:
-    post:
-      summary: Join a game session
-      operationId: postSessionPlayers
+  /sessions/{sessionId}/phase:
+    get:
+      tags:
+        - phases
+      summary: 現在のフェーズ情報取得
+      description: セッションの現在のフェーズ情報を取得する。プレイヤーごとに異なる情報が返される。
+      operationId: getPhase
       parameters:
-        - name: sessionId
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/SessionIdParam"
+        - $ref: "#/components/parameters/PlayerIdHeader"
+      responses:
+        "200":
+          description: フェーズ情報を取得成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhaseResponse"
+        "400":
+          description: リクエストが不正
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: セッションが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /sessions/{sessionId}/phase/advance:
+    post:
+      tags:
+        - phases
+      summary: フェーズを進める
+      description: 次のフェーズに進む。セッションオーナーのみ実行可能。
+      operationId: advancePhase
+      parameters:
+        - $ref: "#/components/parameters/SessionIdParam"
+        - $ref: "#/components/parameters/PlayerIdHeader"
+      responses:
+        "200":
+          description: フェーズを進めることに成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: リクエストが不正
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: オーナー以外は実行不可
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: セッションが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /sessions/{sessionId}/vote:
+    post:
+      tags:
+        - votes
+      summary: 投票
+      description: 投票フェーズで犯人だと思うプレイヤーに投票する
+      operationId: vote
+      parameters:
+        - $ref: "#/components/parameters/SessionIdParam"
+        - $ref: "#/components/parameters/PlayerIdHeader"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/JoinPlayerRequest"
+              $ref: "#/components/schemas/VoteRequest"
       responses:
         "200":
-          description: Player joined
+          description: 投票成功
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/JoinPlayerResponse"
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: リクエストが不正または既に投票済み
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: セッションが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
-  /sessions/{sessionId}/phase:
+  /sessions/{sessionId}/result:
     get:
-      summary: Get current phase information
-      operationId: getSessionPhase
+      tags:
+        - results
+      summary: ゲーム結果取得
+      description: ゲームの真相、投票結果、勝者を取得する
+      operationId: getResult
       parameters:
-        - name: sessionId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: X-Player-Id
-          in: header
-          required: true
-          schema:
-            type: string
+        - $ref: "#/components/parameters/SessionIdParam"
       responses:
         "200":
-          description: Phase information
+          description: 結果取得成功
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PhaseResponse"
-
-  /sessions/{sessionId}/advance:
-    post:
-      summary: Advance game phase (GM use)
-      operationId: postSessionAdvance
-      parameters:
-        - name: sessionId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Phase advanced
+                $ref: "#/components/schemas/ResultResponse"
+        "400":
+          description: ゲームがまだ終了していない
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AdvancePhaseResponse"
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: セッションが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
+  parameters:
+    SessionIdParam:
+      name: sessionId
+      in: path
+      required: true
+      description: セッションID
+      schema:
+        type: string
+        format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+
+    PlayerIdHeader:
+      name: X-Player-Id
+      in: header
+      required: true
+      description: プレイヤーID
+      schema:
+        type: string
+        format: uuid
+      example: "660e8400-e29b-41d4-a716-446655440001"
+
   schemas:
     CreateSessionRequest:
       type: object
@@ -103,77 +239,196 @@ components:
       properties:
         playerCount:
           type: integer
-          enum: [4, 5]
+          minimum: 2
+          maximum: 5
+          description: プレイヤー人数
+          example: 3
         difficulty:
           type: string
-          enum: [easy, medium, hard]
+          enum:
+            - easy
+            - medium
+            - hard
+          description: 難易度
+          example: "easy"
 
     CreateSessionResponse:
       type: object
       required:
         - sessionId
+        - ownerPlayerId
+        - playerIds
+        - initialPhase
       properties:
         sessionId:
           type: string
-          example: "session_123"
+          format: uuid
+          description: セッションID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        ownerPlayerId:
+          type: string
+          format: uuid
+          description: セッションオーナーのプレイヤーID
+          example: "660e8400-e29b-41d4-a716-446655440001"
+        playerIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: 全プレイヤーのID
+          example:
+            - "660e8400-e29b-41d4-a716-446655440001"
+            - "660e8400-e29b-41d4-a716-446655440002"
+            - "660e8400-e29b-41d4-a716-446655440003"
+        initialPhase:
+          $ref: "#/components/schemas/PhaseInfo"
 
-    JoinPlayerRequest:
+    PhaseInfo:
       type: object
       required:
-        - playerName
+        - phaseNumber
+        - phaseType
+        - description
+        - publicText
+        - duration
       properties:
-        playerName:
+        phaseNumber:
+          type: integer
+          description: フェーズ番号
+          example: 0
+        phaseType:
           type: string
-          example: "Player A"
-
-    JoinPlayerResponse:
-      type: object
-      required:
-        - playerId
-        - roleId
-      properties:
-        playerId:
+          enum:
+            - introduction
+            - discussion
+            - investigation
+            - voting
+            - reveal
+          description: フェーズの種類
+          example: "introduction"
+        description:
           type: string
-          example: "player_1"
-        roleId:
+          description: フェーズの説明
+          example: "事件の概要と各自の立場を確認"
+        publicText:
           type: string
-          example: "p1"
+          description: 全プレイヤーに公開される情報
+          example: "被害者：サミュエル・ゴールドスタイン（65歳）..."
+        duration:
+          type: integer
+          description: 推奨プレイ時間（分）
+          example: 10
 
     PhaseResponse:
       type: object
       required:
-        - phase
-        - gmText
+        - phaseNumber
+        - phaseType
+        - description
+        - publicText
+        - privateText
+        - availableActions
       properties:
-        phase:
+        phaseNumber:
+          type: integer
+          description: フェーズ番号
+          example: 0
+        phaseType:
           type: string
           enum:
-            - intro
-            - investigation1
-            - investigation2
+            - introduction
             - discussion
+            - investigation
             - voting
-            - ending
-        gmText:
+            - reveal
+          description: フェーズの種類
+          example: "introduction"
+        description:
           type: string
-        publicInfo:
+          description: フェーズの説明
+          example: "事件の概要と各自の立場を確認"
+        publicText:
           type: string
-          nullable: true
-        privateInfo:
+          description: 全プレイヤーに公開される情報
+          example: "被害者：サミュエル・ゴールドスタイン（65歳）..."
+        privateText:
           type: string
-          nullable: true
+          description: このプレイヤーだけに表示される情報
+          example: "【あなたの役割】\n名前: アレックス・クロフォード..."
+        availableActions:
+          type: array
+          items:
+            type: string
+          description: このプレイヤーが実行可能なアクション
+          example:
+            - "advance_phase"
 
-    AdvancePhaseResponse:
+    VoteRequest:
       type: object
       required:
-        - phase
+        - targetPlayerId
       properties:
-        phase:
+        targetPlayerId:
           type: string
-          enum:
-            - intro
-            - investigation1
-            - investigation2
-            - discussion
-            - voting
-            - ending
+          format: uuid
+          description: 投票対象のプレイヤーID
+          example: "660e8400-e29b-41d4-a716-446655440002"
+
+    ResultResponse:
+      type: object
+      required:
+        - truth
+        - winnerId
+        - winnerName
+        - votingResult
+        - playerNames
+      properties:
+        truth:
+          type: string
+          description: 事件の真相
+          example: "犯人はアレックス・クロフォードである。動機は..."
+        winnerId:
+          type: string
+          format: uuid
+          description: 最も票を集めたプレイヤーのID
+          example: "660e8400-e29b-41d4-a716-446655440001"
+        winnerName:
+          type: string
+          description: 最も票を集めたプレイヤーの名前
+          example: "アレックス・クロフォード"
+        votingResult:
+          type: object
+          additionalProperties:
+            type: integer
+          description: プレイヤーIDごとの得票数
+          example:
+            "660e8400-e29b-41d4-a716-446655440001": 2
+            "660e8400-e29b-41d4-a716-446655440002": 1
+        playerNames:
+          type: object
+          additionalProperties:
+            type: string
+          description: プレイヤーIDと名前のマッピング
+          example:
+            "660e8400-e29b-41d4-a716-446655440001": "アレックス・クロフォード"
+            "660e8400-e29b-41d4-a716-446655440002": "エミリー・ハートウェル"
+
+    SuccessResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: 成功メッセージ
+          example: "phase advanced successfully"
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: エラーメッセージ
+          example: "session not found"
